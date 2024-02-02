@@ -282,15 +282,17 @@ export default function Home() {
             <div
               onMouseDown={(e) => tileClick(e, rowId, colId)}
               key={colId}
-              className={`w-8 h-8 flex justify-center items-center border-black border-opacity-50 duration-200 cursor-pointer ${
-                col?.visited ? "bg-gray-300" : "white"
-              } ${textClasses?.[col?.count]} font-bold text-lg ${
-                colId === BOARD_SIZE - 1 ? "border-r-[1px]" : ""
+              className={`w-8 h-8 flex justify-center items-center border-black border-opacity-50 duration-200 cursor-pointer font-bold text-lg border-l-[1px] border-t-[1px] relative ${
+                textClasses?.[col?.count]
               } ${
+                col?.poc
+                  ? "bg-[#FF0000] bg-opacity-75"
+                  : col?.visited
+                  ? "bg-gray-300"
+                  : "bg-gray-100 hover:bg-gray-300"
+              }  ${colId === BOARD_SIZE - 1 ? "border-r-[1px]" : ""} ${
                 rowId === BOARD_SIZE - 1 ? "border-b-[1px]" : ""
-              } border-l-[1px] border-t-[1px] ${
-                col?.poc ? "bg-[#FF0000] bg-opacity-75" : "hover:bg-gray-300"
-              } relative`}
+              }`}
             >
               {col?.visited ? (
                 col?.flagged ? (
