@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import mine from "../public/mine.png";
 import flag from "../public/flag.png";
+import Lottie from "lottie-react";
+import ConfettiLottie from "../public/hurray.json";
 
 const MINE_COUNT = 50;
 const BOARD_SIZE = 20;
@@ -21,6 +23,8 @@ const textClasses = {
 };
 
 export default function Home() {
+  const lottieRef = useRef(null);
+
   const [board, setBoard] = useState([]);
   const [mines, setMines] = useState([]);
   const [visitedTiles, setVisitedTiles] = useState(0);
@@ -72,6 +76,7 @@ export default function Home() {
   };
 
   const createBoard = () => {
+    lottieRef?.current?.goToAndStop(0);
     [...mineTimeouts]?.reverse()?.forEach((id) => {
       clearInterval(id);
     });
@@ -271,6 +276,7 @@ export default function Home() {
     if (visitedTiles + MINE_COUNT - flagged === BOARD_SIZE * BOARD_SIZE) {
       setGameStatus("WIN");
       playWinSound();
+      lottieRef?.current?.play();
 
       const dupBoard = JSON.parse(JSON.stringify(board));
       mines?.forEach((mine) => {
@@ -297,9 +303,18 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
+    <main className="flex min-h-screen relative flex-col items-center justify-center overflow-hidden">
+      <div className="absolute mt-[100px] h-full w-full flex flex-col items-center justify-center">
+        <Lottie
+          lottieRef={lottieRef}
+          autoplay={false}
+          animationData={ConfettiLottie}
+          loop={false}
+        />
+      </div>
+
       <div
-        className="cursor-pointer mb-4 px-8 py-1 rounded-md bg-gray-400 hover:bg-gray-300 duration-300"
+        className="cursor-pointer mb-4 px-8 py-1 rounded-md bg-gray-400 hover:bg-gray-300 duration-300 z-10"
         onClick={() => {
           createBoard();
         }}
