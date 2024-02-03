@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import mine from "../public/mine.png";
-import pin from "../public/pin.png";
+import flag from "../public/flag.png";
 
-const MINE_COUNT = 50;
+const MINE_COUNT = 10;
 const BOARD_SIZE = 20;
 const TIMEOUT_TIME = 150;
 
@@ -26,6 +26,7 @@ export default function Home() {
   const [visitedTiles, setVisitedTiles] = useState(0);
   const [flagged, setFlagged] = useState(0);
   const [gameStatus, setGameStatus] = useState("PLAY");
+  const [mineTimeouts, setMineTimeouts] = useState([]);
 
   const randomIntFromInterval = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -71,6 +72,10 @@ export default function Home() {
   };
 
   const createBoard = () => {
+    [...mineTimeouts]?.reverse()?.forEach((id) => {
+      clearInterval(id);
+    });
+
     let tile = {
       visited: false,
       count: 0,
@@ -92,6 +97,7 @@ export default function Home() {
     setGameStatus("PLAY");
     setBoard(boardArray);
     setMines(mineArr);
+    // setMineTimeouts([]);
   };
 
   const recursiveVisit = (board, row, col) => {
@@ -129,6 +135,24 @@ export default function Home() {
     sound.play();
   };
 
+  const playGameSound = () => {
+    const sound = new Audio("/play.mp3");
+    sound.volume = 0.75;
+    sound.play();
+  };
+
+  const playWinSound = () => {
+    const sound = new Audio("/win.mp3");
+    sound.volume = 1;
+    sound.play();
+  };
+
+  const playLoseSound = () => {
+    const sound = new Audio("/lose.mp3");
+    sound.volume = 1;
+    sound.play();
+  };
+
   const blast = (mineCount, mine, remainingMines, TIMEOUT_TIME) => {
     return new Promise((res) => {
       if (board[mine.row][mine.col].visited) {
@@ -145,7 +169,7 @@ export default function Home() {
         return;
       }
 
-      setTimeout(async () => {
+      const timerId = setTimeout(async () => {
         setBoard((board) => {
           const boardDup = JSON.parse(JSON.stringify(board));
           boardDup[mine.row][mine.col].visited = true;
@@ -163,9 +187,10 @@ export default function Home() {
             TIMEOUT_TIME - 3
           );
         }
-
         res();
       }, TIMEOUT_TIME);
+
+      setMineTimeouts((ids) => [...ids, timerId]);
     });
   };
 
@@ -193,15 +218,16 @@ export default function Home() {
       const remainingMines = [...mines];
       remainingMines?.splice(mineIndex, 1);
 
-      playMineSound();
+      playLoseSound();
 
       setBoard(boardDup);
       setGameStatus("LOSE");
-      setTimeout(() => blastMines(remainingMines, TIMEOUT_TIME), TIMEOUT_TIME);
+      setTimeout(() => blastMines(remainingMines, TIMEOUT_TIME), 1250);
       return;
     }
 
     if (!boardDup[row][col].visited) {
+      playGameSound();
       recursiveVisit(boardDup, row, col);
       setBoard(boardDup);
     }
@@ -240,6 +266,7 @@ export default function Home() {
   const winGame = () => {
     if (visitedTiles + MINE_COUNT - flagged === BOARD_SIZE * BOARD_SIZE) {
       setGameStatus("WIN");
+      playWinSound();
 
       const dupBoard = JSON.parse(JSON.stringify(board));
       mines?.forEach((mine) => {
@@ -297,7 +324,7 @@ export default function Home() {
               {col?.visited ? (
                 col?.flagged ? (
                   <>
-                    <Image src={pin} height={24} width={24} alt="pin" />
+                    <Image src={flag} height={22} width={22} alt="pin" />
                     {gameStatus === "LOSE" && !col?.mine ? (
                       <div className="absolute items-center justify-center flex rotate-45">
                         <div className="h-7 w-[3px] rounded-md bg-red-500 absolute" />
