@@ -4,7 +4,7 @@ import Image from "next/image";
 import mine from "../public/mine.png";
 import flag from "../public/flag.png";
 
-const MINE_COUNT = 10;
+const MINE_COUNT = 50;
 const BOARD_SIZE = 20;
 const TIMEOUT_TIME = 150;
 
