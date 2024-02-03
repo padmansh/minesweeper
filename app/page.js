@@ -97,7 +97,7 @@ export default function Home() {
     setGameStatus("PLAY");
     setBoard(boardArray);
     setMines(mineArr);
-    // setMineTimeouts([]);
+    setMineTimeouts([]);
   };
 
   const recursiveVisit = (board, row, col) => {
@@ -222,7 +222,11 @@ export default function Home() {
 
       setBoard(boardDup);
       setGameStatus("LOSE");
-      setTimeout(() => blastMines(remainingMines, TIMEOUT_TIME), 1250);
+      const bigTimer = setTimeout(
+        () => blastMines(remainingMines, TIMEOUT_TIME),
+        1250
+      );
+      setMineTimeouts((id) => [...id, bigTimer]);
       return;
     }
 
