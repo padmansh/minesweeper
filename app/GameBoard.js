@@ -27,7 +27,7 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
   const [mines, setMines] = useState([]);
   const [visitedTiles, setVisitedTiles] = useState(0);
   const [flagged, setFlagged] = useState(0);
-  const [gameStatus, setGameStatus] = useState("PLAY");
+  const [gameStatus, setGameStatus] = useState("IDLE");
   const [mineTimeouts, setMineTimeouts] = useState([]);
 
   const randomIntFromInterval = (min, max) => {
@@ -40,13 +40,13 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
     });
   };
 
-  const putMine = (board, mines, count) => {
+  const putMine = (board, mines, count, banRow, banCol) => {
     if (count === MINE_COUNT) return { board, mines };
     const row = randomIntFromInterval(0, ROWS - 1);
     const col = randomIntFromInterval(0, COLS - 1);
 
-    if (board[row][col].mine) {
-      return putMine(board, mines, count);
+    if ((row === banRow && col === banCol) || board[row][col].mine) {
+      return putMine(board, mines, count, banRow, banCol);
     } else {
       board[row][col].mine = true;
       if (row - 1 >= 0 && col - 1 >= 0) {
@@ -75,11 +75,12 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
       }
       count++;
       mines.push({ row, col });
-      return putMine(board, mines, count);
+      return putMine(board, mines, count, banRow, banCol);
     }
   };
 
   const createBoard = () => {
+    setGameStatus("IDLE");
     lottieRef?.current?.goToAndStop(0);
     stopBlastPipe();
 
@@ -92,16 +93,9 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
     };
 
     const boardArr = Array(ROWS).fill(Array(COLS).fill({ ...tile }));
-    const { board: boardArray, mines: mineArr } = putMine(
-      JSON.parse(JSON.stringify(boardArr)),
-      [],
-      0
-    );
     setVisitedTiles(0);
     setFlagged(0);
-    setGameStatus("PLAY");
-    setBoard(boardArray);
-    setMines(mineArr);
+    setBoard(boardArr);
     setMineTimeouts([]);
   };
 
@@ -211,16 +205,32 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
   };
 
   const handleTileVisit = (row, col) => {
-    const boardDup = JSON.parse(JSON.stringify(board));
+    let boardDu = JSON.parse(JSON.stringify(board));
+    let mineArr = [...mines];
+    if (gameStatus === "IDLE") {
+      const { board: boardArray, mines: mineAr } = putMine(
+        JSON.parse(JSON.stringify(boardDu)),
+        [],
+        0,
+        row,
+        col
+      );
+      boardDu = boardArray;
+      mineArr = mineAr;
+
+      setMines(mineArr);
+      setGameStatus("PLAY");
+    }
+    const boardDup = boardDu;
     if (boardDup[row][col].visited) return;
     if (boardDup[row][col].mine) {
       boardDup[row][col].visited = true;
       boardDup[row][col].poc = true;
 
-      const mineIndex = mines?.findIndex(
+      const mineIndex = mineArr?.findIndex(
         (mine) => mine?.row === row && mine?.col === col
       );
-      const remainingMines = [...mines];
+      const remainingMines = [...mineArr];
       remainingMines?.splice(mineIndex, 1);
 
       playLoseSound();
@@ -264,7 +274,7 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
   };
 
   const tileClick = (e, row, col) => {
-    if (gameStatus !== "PLAY") return;
+    if (gameStatus === "WIN" || gameStatus === "LOSE") return;
     if (e?.which === 3 || e?.button === 2) {
       markFlag(row, col);
     } else {
