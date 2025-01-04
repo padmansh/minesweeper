@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import mine from "../public/mine.png";
 import flag from "../public/flag.png";
-import Lottie from "lottie-react";
+// import Lottie from "lottie-react";
 import ConfettiLottie from "../public/hurray.json";
 
 const TIMEOUT_TIME = 150;
@@ -21,7 +21,7 @@ const textClasses = {
 };
 
 export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
-  const lottieRef = useRef(null);
+  // const lottieRef = useRef(null);
 
   const [board, setBoard] = useState([]);
   const [mines, setMines] = useState([]);
@@ -81,7 +81,7 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
 
   const createBoard = () => {
     setGameStatus("IDLE");
-    lottieRef?.current?.goToAndStop(0);
+    // lottieRef?.current?.goToAndStop(0);
     stopBlastPipe();
 
     let tile = {
@@ -286,7 +286,7 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
     if (visitedTiles + MINE_COUNT - flagged === ROWS * COLS) {
       setGameStatus("WIN");
       playWinSound();
-      lottieRef?.current?.play();
+      // lottieRef?.current?.play();
 
       const dupBoard = JSON.parse(JSON.stringify(board));
       mines?.forEach((mine) => {
@@ -314,14 +314,14 @@ export default function GameBoard({ MINE_COUNT, ROWS, COLS, setGame }) {
 
   return (
     <div className="flex flex-col items-center relative w-full max-w-[800px]">
-      <div className="absolute md:mt-[120px] mt-[50px] h-full w-full flex flex-col items-center justify-center">
+      {/* <div className="absolute md:mt-[120px] mt-[50px] h-full w-full flex flex-col items-center justify-center">
         <Lottie
           lottieRef={lottieRef}
           autoplay={false}
           animationData={ConfettiLottie}
           loop={false}
         />
-      </div>
+      </div> */}
 
       <div className="flex gap-x-3 w-full px-3 max-w-[400px]">
         <div

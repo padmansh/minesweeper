@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import mine from "../public/mine.png";
 import GameBoard from "./GameBoard";
+import Script from "next/script";
 
 const gameConfigWeb = [
   {
@@ -106,6 +107,12 @@ export default function Home() {
           </div>
         </>
       )}
+
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9981645556410838"
+        crossorigin="anonymous"
+      ></Script>
     </main>
   );
 }
